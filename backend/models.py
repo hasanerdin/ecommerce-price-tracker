@@ -15,6 +15,7 @@ class Product(Base):
     __tablename__ = "products"
 
     product_id = Column(Integer, primary_key=True, autoincrement=True)
+    external_id = Column(Integer, nullable=False)
     title = Column(String[255], nullable=False)
     description = Column(String[255], nullable=True)
     base_price = Column(Float, nullable=False)
@@ -38,10 +39,10 @@ class PriceHistory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
     price = Column(Float, nullable=False)
-    discount_percent = Column(Float, nullable=False)
-    price_change_reason = Column(String[50], nullable=False)
-    event_name = Column(String[255], ForeignKey("events.event_name", ondelete="CASCADE"), nullable=False)
-    
+    price_change_reason = Column(String[50], nullable=True)
+    event_name = Column(String[255], ForeignKey("events.event_name", ondelete="CASCADE"), nullable=True)
+    price_source = Column(String(50), nullable=True)
+
     recorded_date = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 

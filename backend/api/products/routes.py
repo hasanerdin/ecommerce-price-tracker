@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from backend.schemas import ProductResponse, PriceHistoryResponse
 from backend.database import get_db
-from backend.api import crud_products
+from backend.api.products import crud
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -21,7 +21,7 @@ def list_places(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
         List of products
     """
 
-    products = crud_products.get_products(db, skip, limit)
+    products = crud.get_all_products(db, skip, limit)
     return products
 
 @router.get("/{product_id}", response_model=ProductResponse)
@@ -39,7 +39,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     Raises:
         HTTPException if product not found
     """
-    product = crud_products.get_product(db, product_id)
+    product = crud.get_product(db, product_id)
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -64,7 +64,7 @@ def get_price_histories(product_id: int, skip: int = 0, limit: int = 100, db: Se
     Raises:
         HTTPException if any price history for that product not found
     """
-    price_histories = crud_products.get_price_history(db, product_id, skip, limit)
+    price_histories = crud.get_price_history(db, product_id, skip, limit)
     if not price_histories:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

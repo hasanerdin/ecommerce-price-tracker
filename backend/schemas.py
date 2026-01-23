@@ -4,40 +4,41 @@ from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field, validator
 
 # Product Schemas
-class ProductBase(BaseModel):
+class ProductCreate(BaseModel):
     """Schema for product information"""
+    extarnal_id: int
     title: str = Field(..., min_length=1, max_length=255)
     description: str = Field(..., min_length=1, max_length=255)
     base_price: float
     rating: float
 
-    created_at: datetime
-    updated_at: datetime
-
-class ProductResponse(ProductBase):
+class ProductResponse(ProductCreate):
     """Schema for proudct response"""
     id: int
 
     class Config:
         from_attributes = True
 
-class PriceHistoryBase(BaseModel):
+# Price History
+
+class PriceHistoryCreate(BaseModel):
     """Schema for price history information"""
     product_id: int
     price: float
-    discount_percent: float
-    price_change_reason: str = Field(..., min_length=1, max_length=50)
-    event_name: str = Field(..., min_length=1, max_length=255)
+    price_change_reason: str = Field(None, min_length=1, max_length=50)
+    event_name: str = Field(None, min_length=1, max_length=255)
+    price_source: Optional[str] = Field(None, pattern="^(synthetic|api|scraping)$")
 
     recorded_date: datetime
-    created_at: datetime
 
-class PriceHistoryResponse(PriceHistoryBase):
+class PriceHistoryResponse(PriceHistoryCreate):
     """Schema for price history response"""
     id: int
     
     class Config:
         from_attributes = True
+
+# Events
 
 class EventCreate(BaseModel):
     """Schema for creating event"""
@@ -62,7 +63,7 @@ class EventUpdate(BaseModel):
 class EventResponse(BaseModel):
     """Schema for event response"""
     event_id: int
-    event_name: str = Field(..., min_length=1, max_length=255)
+    event_name: str = Field(None, min_length=1, max_length=255)
 
     start_date: date
     end_date: date

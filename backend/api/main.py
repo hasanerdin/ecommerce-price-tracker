@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from backend.database import engine, init_db
 from backend.models import Base
 from backend.schemas import HealthResponse
-from backend.api import routes_products as product_router
+from backend.api.products import routes as product_router
 from backend.api import routes_analytics as analytic_router
 
 @asynccontextmanager
