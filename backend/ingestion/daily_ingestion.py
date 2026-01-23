@@ -39,17 +39,11 @@ def get_or_create_product(db: Session, product_data: dict) -> Product:
     
     return product
 
-def get_or_create_price_history(db: Session, product: Product, final_price: float, metadata: dict) -> PriceHistory:
+def is_price_history_created(db: Session, product_id: int, recorded_date: date):
     price_history = product_crud.get_price_history_by_recorded_date(db, 
-                                                                    product.product_id, 
-                                                                    metadata["recorded_date"])
-    if price_history is None:
-        price_history_create_data = generate_price_history_create_data(product,
-                                                                           final_price,
-                                                                           metadata)
-        price_history = product_crud.create_price_history(db, price_history_create_data)
-
-    return price_history
+                                                                    product_id, 
+                                                                    recorded_date)
+    return price_history is not None
 
 def run_daily_ingestion(db: Session, snapshot_date: Optional[date] = None) -> None:
     """
@@ -70,10 +64,13 @@ def run_daily_ingestion(db: Session, snapshot_date: Optional[date] = None) -> No
                 pricing_mode=PRICING_MODE
             )            
 
+            if is_price_history_created(db, product.product_id, snapshot_date):
+                continue
+
             metadata["recorded_date"] = snapshot_date
-
-            price_history = get_or_create_price_history(db, product, final_price, metadata)
-
+            price_history_create_data = generate_price_history_create_data(product, final_price, metadata)
+            
+            product_crud.create_price_history(db, price_history_create_data)
             inserted_snapshots += 1
 
         print(f"[INGESTION] {inserted_snapshots} price snapshots inserted.")
