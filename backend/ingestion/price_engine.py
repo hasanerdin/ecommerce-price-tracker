@@ -1,5 +1,5 @@
 """Generate Synthetic price according to events"""
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional, Tuple
 import random
 
@@ -15,7 +15,7 @@ def get_event_for_date(date: date) -> Optional[EventRule]:
     Returns the event rule applicable for the given date, if any.
     """
     for event_rule in EVENT_RULES:
-        if event_rule.start_date <= date <= event_rule.end_date:
+        if event_rule.start_date - timedelta(days=event_rule.pre_event_days) <= date <= event_rule.end_date:
             return event_rule
     
     return None
@@ -47,7 +47,7 @@ def apply_event_discount(price: float, discount_range: Tuple[float, float]) -> f
     return price * (1 - discount)
 
 
-def apply_daily_noise(price: float, noise_range: Tuple[float, float] = (-0.03, 0.03)) -> float:
+def apply_daily_noise(price: float, noise_range: Tuple[float, float] = DAILY_PRICE_NOISE) -> float:
     """
     Applies small daily random fluctuation.
     """
@@ -74,6 +74,7 @@ def generate_daily_price(
     price = base_price
     metadata = {
         "price_source": pricing_mode,
+        "event_id": None,
         "event_name": None,
         "adjustment_reason": "base_price",
     }
@@ -86,6 +87,7 @@ def generate_daily_price(
     event = get_event_for_date(current_date)
 
     if event:
+        metadata["event_id"] = event.event_id
         metadata["event_name"] = event.name
 
         # Pre-event uplift
@@ -97,7 +99,7 @@ def generate_daily_price(
             price = apply_event_discount(price, event.discount_range)
             metadata["adjustment_reason"] = "event_discount"
 
-            if event.noise_enable:
+            if event.noise_enabled:
                 # Normal daily noise
                 price = apply_daily_noise(price)
                 metadata["adjustment_reason"] += "+noise"

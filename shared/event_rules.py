@@ -5,16 +5,18 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class EventRule:
+    event_id: int
     name: str 
     start_date: date 
     end_date: date
     pre_event_days: int = 7
     pre_event_uplift_range: Tuple[float, float] = (0.0, 0.0)
     discount_range: Tuple[float, float] = (0.0, 0.0)
-    noise_enable: bool = False
+    noise_enabled: bool = False
 
 EVENT_RULES = [
     EventRule(
+        event_id=1,
         name="Valentines Day",
         start_date=date(2026, 2, 14),
         end_date=date(2026, 2, 14),
@@ -25,6 +27,7 @@ EVENT_RULES = [
     ),
 
     EventRule(
+        event_id=2,
         name="Easter Sale",
         start_date=date(2026, 4, 3),
         end_date=date(2026, 4, 6),
@@ -35,6 +38,7 @@ EVENT_RULES = [
     ),
 
     EventRule(
+        event_id=3,
         name="Back to School",
         start_date=date(2026, 8, 15),
         end_date=date(2026, 8, 31),
@@ -45,6 +49,7 @@ EVENT_RULES = [
     ),
 
     EventRule(
+        event_id=4,
         name="Black Friday",
         start_date=date(2026, 11, 27),
         end_date=date(2026, 11, 27),
@@ -55,6 +60,7 @@ EVENT_RULES = [
     ),
 
     EventRule(
+        event_id=5,
         name="Christmas Sale",
         start_date=date(2026, 12, 20),
         end_date=date(2026, 12, 26),

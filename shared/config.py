@@ -1,5 +1,5 @@
 """Shared configuration settings"""
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from shared.constants import PriceType
 
@@ -22,15 +22,16 @@ class Settings(BaseSettings):
 
     # API keys
     # TODO: If any API is required, add here
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    
+    model_config=SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False
+    )
 
     @property
     def database_url(self) -> str:
         """Construct MySQL database URL"""
-        return f"Mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+        return f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
 class ProductAPI:
     """API informations to fetch product's prices"""    

@@ -1,14 +1,14 @@
 """Pydantic schemas for request/response validation"""
 from datetime import date, datetime
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field
 
 # Product Schemas
 class ProductCreate(BaseModel):
     """Schema for product information"""
     extarnal_id: int
     title: str = Field(..., min_length=1, max_length=255)
-    description: str = Field(..., min_length=1, max_length=255)
+    description: str = Field(..., min_length=1, max_length=1000)
     base_price: float
     rating: float
 
@@ -16,27 +16,25 @@ class ProductResponse(ProductCreate):
     """Schema for proudct response"""
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config=ConfigDict(from_attributes=True)
 
 # Price History
 
 class PriceHistoryCreate(BaseModel):
     """Schema for price history information"""
     product_id: int
+    event_id: Optional[int]
     price: float
     price_change_reason: str = Field(None, min_length=1, max_length=50)
-    event_name: str = Field(None, min_length=1, max_length=255)
-    price_source: Optional[str] = Field(None, pattern="^(synthetic|api|scraping)$")
+    price_source: Optional[str] = Field(None, pattern="^(synthetic|real)$")
 
     recorded_date: datetime
 
 class PriceHistoryResponse(PriceHistoryCreate):
     """Schema for price history response"""
     id: int
-    
-    class Config:
-        from_attributes = True
+
+    model_config=ConfigDict(from_attributes=True)
 
 # Events
 
@@ -71,8 +69,7 @@ class EventResponse(BaseModel):
     min_discount: float
     max_discount: float
 
-    class Config:
-        from_attributes = True
+    model_config=ConfigDict(from_attributes=True)
 
 
 # Analytics
@@ -87,8 +84,8 @@ class PriceSummaryResponse(BaseModel):
     max_price: float
     avg_price: float
 
-    class Config:
-        from_attributes = True
+    model_config=ConfigDict(from_attributes=True)
+
 
 class DiscountSummaryResponse(BaseModel):
     """Schema for price summary"""
@@ -101,8 +98,7 @@ class DiscountSummaryResponse(BaseModel):
     max_discount: float
     avg_discount: float
 
-    class Config:
-        from_attributes = True
+    model_config=ConfigDict(from_attributes=True)
 
 # Health Check Schema
 class HealthResponse(BaseModel):

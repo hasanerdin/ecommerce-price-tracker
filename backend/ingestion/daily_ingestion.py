@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import date
 from sqlalchemy.orm import Session
 
+from backend.database import get_db
 from backend.models import Product, PriceHistory
 from backend.schemas import ProductCreate, PriceHistoryCreate
 from backend.api.products import crud as product_crud
@@ -17,22 +18,22 @@ def generate_product_create_data(product_data: dict) -> ProductCreate:
         extarnal_id=product_data["id"],
         title=product_data["title"],
         description=product_data["description"],
-        base_price=product_data["base_price"],
-        rating=product_data["rating"],
+        base_price=product_data["price"],
+        rating=product_data["rating"]["rate"],
     )
 
 def generate_price_history_create_data(product: Product, final_price: float, metadata: dict) -> PriceHistoryCreate:    
     return PriceHistoryCreate(
         product_id=product.product_id,
+        event_id= metadata["event_id"],
         price=final_price,
         price_change_reason=metadata["adjustment_reason"],
-        event_name=metadata["event_name"],
-        price_source=metadata["price_source"],
+        price_source=metadata["price_source"].value,
         recorded_date=metadata["recorded_date"],
     )
 
 def get_or_create_product(db: Session, product_data: dict) -> Product:
-    product = product_crud.get_product_by_external_id(product_data["id"])
+    product = product_crud.get_product_by_external_id(db, product_data["id"])
     if product is None:
         product_create_data = generate_product_create_data(product_data)
         product = product_crud.create_product(db, product_create_data)
@@ -81,4 +82,7 @@ def run_daily_ingestion(db: Session, snapshot_date: Optional[date] = None) -> No
     
 
 if __name__ == "__main__":
-    run_daily_ingestion()
+    db: Session = get_db()
+    snapshot_date = date.today()
+
+    run_daily_ingestion(db, snapshot_date)

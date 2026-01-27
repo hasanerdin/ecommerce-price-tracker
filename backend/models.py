@@ -16,8 +16,8 @@ class Product(Base):
 
     product_id = Column(Integer, primary_key=True, autoincrement=True)
     external_id = Column(Integer, nullable=False)
-    title = Column(String[255], nullable=False)
-    description = Column(String[255], nullable=True)
+    title = Column(String(255), nullable=False)
+    description = Column(String(1000), nullable=True)
     base_price = Column(Float, nullable=False)
     rating = Column(Float, nullable=False)
     
@@ -37,10 +37,11 @@ class PriceHistory(Base):
     __tablename__ = "price_histories"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.product_id", ondelete="CASCADE"), nullable=False)
+    event_id = Column(Integer, ForeignKey("events.event_id", ondelete="CASCADE"), nullable=True)
+    
     price = Column(Float, nullable=False)
-    price_change_reason = Column(String[50], nullable=True)
-    event_name = Column(String[255], ForeignKey("events.event_name", ondelete="CASCADE"), nullable=True)
+    price_change_reason = Column(String(50), nullable=True)
     price_source = Column(String(50), nullable=True)
 
     recorded_date = Column(DateTime, nullable=False)
@@ -59,7 +60,7 @@ class Event(Base):
     __tablename__ = "events"
 
     event_id = Column(Integer, primary_key=True, autoincrement=True)
-    event_name = Column(String[255], nullable=False)
+    event_name = Column(String(255), nullable=False)
 
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)

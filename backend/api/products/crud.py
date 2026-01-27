@@ -107,6 +107,7 @@ def create_product(db: Session, product_data: ProductCreate) -> Product:
         Created Product Instance
     """
     product = Product(
+        external_id=product_data.extarnal_id,
         title=product_data.title,
         description=product_data.description,
         base_price=product_data.base_price,
@@ -131,9 +132,9 @@ def create_price_history(db: Session, price_history_data: PriceHistoryCreate) ->
     """
     price_history = PriceHistory(
         product_id=price_history_data.product_id,
+        event_id=price_history_data.event_id,
         price=price_history_data.price,
         price_change_reason=price_history_data.price_change_reason,
-        event_name=price_history_data.event_name,
         price_source=price_history_data.price_source,
         recorded_date=price_history_data.recorded_date
     )

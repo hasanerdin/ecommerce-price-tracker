@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ecommerce-price-tracker"
+version = "0.1.0"
+description = "E-commerce price tracking and analytics system"
+authors = [
+    { name = "Hasan Erdin" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "sqlalchemy",
+    "pydantic",
+    "requests",
+    "python-dotenv",
+    "pytest",
+    "pymysql",
+]
+
+[tool.setuptools]
+packages = ["backend", "shared"]
