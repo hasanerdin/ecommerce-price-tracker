@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# AI Trip Planner - Project Setup Script
+# E-commerce Price Tracker - Project Setup Script
 
 echo "=========================================="
-echo "AI Trip Planner - Project Setup"
+echo "E-commerce Price Tracker - Setup"
 echo "=========================================="
 
 # Check Python version
@@ -18,6 +18,8 @@ echo "Creating virtual environment..."
 python3 -m venv venv
 
 # Activate virtual environment
+echo ""
+echo "Activating virtual environment..."
 source venv/bin/activate
 
 # Upgrade pip
@@ -35,25 +37,23 @@ if [ ! -f ".env" ]; then
     echo ""
     echo "Creating .env file from template..."
     cp .env.example .env
-    echo "⚠️  Please edit .env file with your MySQL credentials and API keys"
+    echo "⚠️  Please edit .env with your DATABASE_URL and other secrets"
 fi
-
-# Check MySQL connection
-echo ""
-echo "Checking MySQL connection..."
-echo "⚠️  Make sure MySQL is running on localhost:3306"
-echo "⚠️  Create database 'price-tracker' if it doesn't exist:"
-echo "    mysql -u root -p -e 'CREATE DATABASE IF NOT EXISTS price-tracker;'"
 
 echo ""
 echo "=========================================="
 echo "Setup complete!"
 echo "=========================================="
+
 echo ""
 echo "Next steps:"
-echo "1. Edit .env file with your configuration"
-echo "2. Create MySQL database: CREATE DATABASE price-tracker;"
-echo "3. Run: python scripts/setup_database.py"
-echo "4. Run: python scripts/load_sample_data.py"
-echo "5. Start backend: bash scripts/run_backend.sh"
+echo "1. Edit .env file and set DATABASE_URL (Supabase Postgres)"
+echo "2. Initialize database tables:"
+echo "   python scripts/init_db.py"
+echo "3. Seed predefined events:"
+echo "   python backend/ingestion/seed_events.py"
+echo "4. Run daily ingestion manually (optional):"
+echo "   python backend/ingestion/daily_ingestion.py"
+echo "5. Start FastAPI backend:"
+echo "   uvicorn backend.main:app --reload"
 echo ""

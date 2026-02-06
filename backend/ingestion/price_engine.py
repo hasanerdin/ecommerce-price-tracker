@@ -2,30 +2,12 @@
 from datetime import date, timedelta
 from typing import Optional, Tuple
 import random
+from sqlalchemy.orm import Session
 
 from shared.constants import PriceType, DAILY_PRICE_NOISE
-from shared.event_rules import EventRule, EVENT_RULES
+from backend.api.events import crud as event_crud
+from backend.models import Event
 
-# --------------------------------------------------
-#   EVENT LOOKUP
-# --------------------------------------------------
-
-def get_event_for_date(date: date) -> Optional[EventRule]:
-    """
-    Returns the event rule applicable for the given date, if any.
-    """
-    for event_rule in EVENT_RULES:
-        if event_rule.start_date - timedelta(days=event_rule.pre_event_days) <= date <= event_rule.end_date:
-            return event_rule
-    
-    return None
-
-def is_pre_event_day(current_date: date, event: EventRule) -> bool:
-    """
-    Checks whether the current date falls into the pre-event uplift window.
-    """
-    days_to_event = (event.start_date - current_date).days
-    return 0 < days_to_event <= event.pre_event_days
 
 # --------------------------------------------------
 # Price adjustments
@@ -55,10 +37,61 @@ def apply_daily_noise(price: float, noise_range: Tuple[float, float] = DAILY_PRI
     return price * (1 + noise)
 
 # --------------------------------------------------
+# Event price update
+# --------------------------------------------------
+
+def active_event_price_update(base_price: float, active_event: Event, metadata: dict) -> Tuple[float, dict]:
+    discount = random.uniform(
+        active_event.discount_min,
+        active_event.discount_max
+    )
+
+    final_price = base_price * (1-discount)
+
+    metadata.update(
+        {
+            "adjustment_reason": "event_discount",
+            "event_id": active_event.event_id,
+            "event_name": active_event.event_name
+        }
+    )
+
+    if active_event.noise_enabled:
+        # Normal daily noise
+        price = apply_daily_noise(price)
+        metadata["adjustment_reason"] += "+noise"
+
+    return round(final_price, 2), metadata
+
+def pre_event_price_update(base_price: float, pre_event: Event, metadata: dict) -> Tuple[float, dict]:
+    uplift = random.uniform(
+        pre_event.pre_event_uplift_min,
+        pre_event.pre_event_uplift_max,
+    )
+
+    final_price = base_price * (1 + uplift)
+
+    metadata.update(
+        {
+            "adjustment_reason": "pre_event_uplift",
+            "event_id": pre_event.event_id,
+            "event_name": pre_event.event_name,
+        }
+    )
+
+    if pre_event.noise_enabled:
+        # Normal daily noise
+        price = apply_daily_noise(price)
+        metadata["adjustment_reason"] += "+noise"
+
+    return round(final_price, 2), metadata
+
+# --------------------------------------------------
 # Main entry point
 # --------------------------------------------------
 
 def generate_daily_price(
+    db: Session,
     base_price: float,
     current_date: date,
     pricing_mode: PriceType = PriceType.Synthetic,
@@ -73,10 +106,11 @@ def generate_daily_price(
 
     price = base_price
     metadata = {
-        "price_source": pricing_mode,
+        "adjustment_reason": "base_price",
         "event_id": None,
         "event_name": None,
-        "adjustment_reason": "base_price",
+        "price_source": pricing_mode,
+        "recorded_date": current_date
     }
 
     # Real pricing mode
@@ -84,28 +118,19 @@ def generate_daily_price(
         return round(price, 2), metadata
     
     # Synthetic pricing mode
-    event = get_event_for_date(current_date)
 
-    if event:
-        metadata["event_id"] = event.event_id
-        metadata["event_name"] = event.name
+    # Active event
+    active_event = event_crud.get_active_event(db, current_date)
+    if active_event:
+        return active_event_price_update(base_price, active_event, metadata)
+    
+    # Pre-event
+    pre_event = event_crud.get_pre_event(db, current_date)
+    if pre_event:
+        return pre_event_price_update(base_price, pre_event, metadata)
+    
+    # Normal day noise
+    final_price = apply_daily_noise(base_price)
+    metadata["adjustment_reason"] += "+noise"
 
-        # Pre-event uplift
-        if is_pre_event_day(current_date, event):
-            price = apply_pre_event_uplift(price, event.pre_event_uplift_range)
-            metadata["adjustment_reason"] = "pre_event_uplift" 
-        # Event day discount
-        elif event.start_date <= current_date <= event.end_date:
-            price = apply_event_discount(price, event.discount_range)
-            metadata["adjustment_reason"] = "event_discount"
-
-            if event.noise_enabled:
-                # Normal daily noise
-                price = apply_daily_noise(price)
-                metadata["adjustment_reason"] += "+noise"
-    else:
-        # Normal daily noise
-        price = apply_daily_noise(price)
-        metadata["adjustment_reason"] += "+noise"
-
-    return round(price, 2), metadata
+    return round(final_price, 2), metadata

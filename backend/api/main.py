@@ -8,7 +8,8 @@ from backend.database import engine, init_db
 from backend.models import Base
 from backend.schemas import HealthResponse
 from backend.api.products import routes as product_router
-from backend.api import routes_analytics as analytic_router
+from backend.api.analytics import routes as analytic_router
+from backend.api.events import routes as event_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,6 +37,7 @@ app.add_middleware(
 # app.include_router(event_router)
 app.include_router(product_router)
 app.include_router(analytic_router)
+app.include_router(event_router)
 
 @app.get("/", status_code=status.HTTP_200_OK)
 def root():

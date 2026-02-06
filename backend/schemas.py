@@ -45,8 +45,14 @@ class EventCreate(BaseModel):
     start_date: date
     end_date: date
 
-    min_discount: float
-    max_discount: float
+    pre_event_days: int
+    pre_event_uplift_min: float
+    pre_event_uplift_max: float
+
+    discount_min: float
+    discount_max: float
+
+    noise_enabled: bool
 
 class EventUpdate(BaseModel):
     """Schema for updating event"""
@@ -55,19 +61,18 @@ class EventUpdate(BaseModel):
     start_date: Optional[date]
     end_date: Optional[date]
 
-    min_discount: Optional[float]
-    max_discount: Optional[float]
+    pre_event_days: Optional[int]
+    pre_event_uplift_min: Optional[float]
+    pre_event_uplift_max: Optional[float]
 
-class EventResponse(BaseModel):
+    discount_min: Optional[float]
+    discount_max: Optional[float]
+
+    noise_enabled: Optional[bool]
+
+class EventResponse(EventCreate):
     """Schema for event response"""
     event_id: int
-    event_name: str = Field(None, min_length=1, max_length=255)
-
-    start_date: date
-    end_date: date
-
-    min_discount: float
-    max_discount: float
 
     model_config=ConfigDict(from_attributes=True)
 

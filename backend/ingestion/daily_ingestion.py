@@ -15,7 +15,7 @@ PRICING_MODE = PriceType.Synthetic
 def get_product(db: Session, external_id: int) -> Optional[Product]:
     return db.query(Product).filter(Product.external_id == external_id).first()
 
-def create_product(db: Session, product_data: dict) -> Product:
+def create_product(product_data: dict) -> Product:
     return Product(
         external_id=product_data["id"],
         title=product_data["title"],
@@ -56,9 +56,12 @@ def run_daily_ingestion(snapshot_date: Optional[date] = None) -> None:
         for product_data in products:
             product = get_product(db, product_data["id"])
             if product is None:
-                product = create_product(db, product_data)
+                product = create_product(product_data)
+                db.add(product)
+                db.flush()
 
             final_price, metadata = generate_daily_price(
+                db,
                 base_price=product.base_price,
                 current_date=snapshot_date,
                 pricing_mode=PRICING_MODE
@@ -67,7 +70,6 @@ def run_daily_ingestion(snapshot_date: Optional[date] = None) -> None:
             if is_price_history_created(db, product.product_id, snapshot_date):
                 continue
 
-            metadata["recorded_date"] = snapshot_date
             price_history = create_price_history(product, final_price, metadata)
             
             db.add(price_history)

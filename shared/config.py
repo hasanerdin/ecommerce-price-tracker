@@ -7,21 +7,12 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
 
     # Database Configuration
-    db_host: str = "localhost"
-    db_port: int = 3306
     db_name: str = "price-tracker"
-    db_user: str = "root"
+    db_port: int = "5432"
     db_password: str = ""
-
-    # API Configuration
-    api_host: str = "0.0.0.0"
-    api_port: int = 8000
-
-    # Frontend Configuration
-    frontend_port: int = 8501
-
-    # API keys
-    # TODO: If any API is required, add here
+    db_host: str = ""
+    db_database: str = "postgres"
+    db_user: str = "postgres"
     
     model_config=SettingsConfigDict(
         env_file=".env",
@@ -31,7 +22,7 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         """Construct MySQL database URL"""
-        return f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+        return f"postgresql://{self.db_database}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_user}"
 
 class ProductAPI:
     """API informations to fetch product's prices"""    

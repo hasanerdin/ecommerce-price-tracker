@@ -60,13 +60,23 @@ class Event(Base):
     __tablename__ = "events"
 
     event_id = Column(Integer, primary_key=True, autoincrement=True)
-    event_name = Column(String(255), nullable=False)
+    event_name = Column(String(255), nullable=False, unique=True)
 
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
 
-    min_discount = Column(Float, nullable=False)
-    max_discount = Column(Float, nullable=False)
+    pre_event_days = Column(Integer, default=0)
+    pre_event_uplift_min = Column(Float, nullable=True)
+    pre_event_uplift_max = Column(Float, nullable=True)
+
+    discount_min = Column(Float, nullable=True)
+    discount_max = Column(Float, nullable=True)
+
+    noise_enabled = Column(Boolean, default=False)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # relationships
     price_histories = relationship("PriceHistory", back_populates="event", cascade="all, delete-orphan")
