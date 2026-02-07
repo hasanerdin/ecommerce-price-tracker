@@ -36,7 +36,7 @@ def test_pre_event_uplift_applied(db_session):
     )
 
     assert price > 100
-    assert metadata["event_name"] == "Valentines Day"
+    assert metadata["event_name"] == None
     assert metadata["adjustment_reason"] == "pre_event_uplift"
 
 def test_real_pricing_mode_no_change(db_session):

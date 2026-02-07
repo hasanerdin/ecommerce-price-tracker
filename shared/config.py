@@ -4,16 +4,21 @@ from functools import lru_cache
 from shared.constants import PriceType
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables"""
-
+    """Application settings for MySQL from environment variables"""
     # Database Configuration
+    db_host: str = "localhost"
+    db_port: int = 3306
     db_name: str = "price-tracker"
-    db_port: int = "5432"
+    db_user: str = "root"
     db_password: str = ""
-    db_host: str = ""
-    db_database: str = "postgres"
-    db_user: str = "postgres"
-    
+
+    # API Configuration
+    api_host: str = "0.0.0.0"
+    api_port: int = 8000
+
+    # Frontend Configuration
+    frontend_port: int = 8501
+
     model_config=SettingsConfigDict(
         env_file=".env",
         case_sensitive=False
@@ -22,7 +27,7 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         """Construct MySQL database URL"""
-        return f"postgresql://{self.db_database}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_user}"
+        return f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
 class ProductAPI:
     """API informations to fetch product's prices"""    

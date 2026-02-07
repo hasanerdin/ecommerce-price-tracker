@@ -58,43 +58,6 @@ def count_products(db: Session) -> int:
     """
     return db.query(Product).count()
 
-def get_price_history(db: Session, product_id: int, 
-                      skip: int = 0, limit: int = 100) -> Optional[List[PriceHistory]]:
-    """
-    Get list of all price history of the product
-
-    Args:
-        db: Database session
-        product_id: Product ID
-        skip: Number of records to skip
-        limit: Maximum number of records to return
-
-    Returns:
-        List of price history or None if product_id not found
-    """
-    return db.query(PriceHistory).filter(
-        PriceHistory.product_id == product_id
-    ).order_by(
-        PriceHistory.created_at.desc()
-        ).offset(skip).limit(limit).all()
-
-def get_price_history_by_recorded_date(db: Session, product_id: int, recorded_date: date) -> Optional[PriceHistory]:
-    """
-    Get a price history instance by product_id and recorded_date
-
-    Args:
-        db: Database session
-        product_id: Product ID
-        recorded_date: When the instance is recorded
-
-    Returns:
-        Price History instance or None if not found
-    """
-    return db.query(PriceHistory).filter(
-        PriceHistory.product_id == product_id,
-        PriceHistory.recorded_date == recorded_date
-    ).first()
-
 def create_product(db: Session, product_data: ProductCreate) -> Product:
     """
     Create a new product

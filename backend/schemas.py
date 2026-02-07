@@ -105,6 +105,18 @@ class DiscountSummaryResponse(BaseModel):
 
     model_config=ConfigDict(from_attributes=True)
 
+class EventImpactResponse(BaseModel):
+    """Schema for event impact"""
+    event_id: int
+    event_name: str = Field(..., min_length=1, max_length=255)
+
+    product_id: int
+
+    pre_event_avg_price: float
+    event_avg_price: float
+    price_change_pct: float
+    price_change_abs: float
+
 # Health Check Schema
 class HealthResponse(BaseModel):
     """Schema for health check response."""

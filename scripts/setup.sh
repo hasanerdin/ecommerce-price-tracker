@@ -32,6 +32,11 @@ echo ""
 echo "Installing Python packages..."
 pip install -r requirements.txt
 
+# Project build
+echo ""
+echo "Building project..."
+pip install -e .
+
 # Create .env file if it doesn't exist
 if [ ! -f ".env" ]; then
     echo ""
@@ -47,13 +52,11 @@ echo "=========================================="
 
 echo ""
 echo "Next steps:"
-echo "1. Edit .env file and set DATABASE_URL (Supabase Postgres)"
+echo "1. Edit .env file and set DATABASE_URL (MySQL)"
 echo "2. Initialize database tables:"
-echo "   python scripts/init_db.py"
-echo "3. Seed predefined events:"
-echo "   python backend/ingestion/seed_events.py"
-echo "4. Run daily ingestion manually (optional):"
+echo "   python scripts/setup_database.py"
+echo "3. Run daily ingestion manually (optional):"
 echo "   python backend/ingestion/daily_ingestion.py"
-echo "5. Start FastAPI backend:"
+echo "4. Start FastAPI backend:"
 echo "   uvicorn backend.main:app --reload"
 echo ""

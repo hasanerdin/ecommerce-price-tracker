@@ -74,8 +74,8 @@ def pre_event_price_update(base_price: float, pre_event: Event, metadata: dict) 
     metadata.update(
         {
             "adjustment_reason": "pre_event_uplift",
-            "event_id": pre_event.event_id,
-            "event_name": pre_event.event_name,
+            "event_id": None, # Pre-event does not mean event is active.
+            "event_name": None, # Pre-event does not mean event is active.
         }
     )
 

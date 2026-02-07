@@ -1,98 +1,190 @@
 🛒 E-Commerce Price & Discount Tracker
 
-This project tracks product prices from online e-commerce platforms and stores historical pricing data to help users analyze price changes over time.
-By providing simple and meaningful visualizations, the application enables users to understand price trends, identify discount periods, and make informed purchasing or pricing decisions.
+An end-to-end backend system that tracks product prices from e-commerce platforms, simulates realistic price changes (discounts, campaigns, noise), and exposes analytical insights through a RESTful API.
+
+The project focuses on clean data modeling, reliable ingestion, and event-based price analytics, serving as a strong backend foundation for future dashboards and data applications.
 
 🎯 Motivation
 
-Product prices on online shopping platforms frequently change due to discounts, campaigns, and market dynamics. These changes are often temporary and difficult to track manually.
-This project aims to provide an automated and transparent way to monitor historical price movements, allowing users to better understand pricing behavior over time.
+Product prices in e-commerce platforms change frequently due to campaigns, seasonal events, and market behavior.
+These changes are often temporary, unstructured, and hard to analyze retrospectively.
+
+This project aims to:
+
+- Automatically track product prices over time
+- Store historical price snapshots in a structured database
+- Simulate realistic pricing behavior (events, discounts, noise)
+- Provide clean analytical endpoints to measure event impact on prices
 
 👥 Target Users
 
-- End users who want to identify the best time to purchase products
-- Analysts interested in price trend analysis
-- Businesses seeking insights into market price movements
+- End users who want to analyze historical price trends
+- Data analysts interested in pricing behavior and event impact
+- Developers building dashboards or analytics on top of pricing data
 
 🧩 User Stories
 
-- As a user, I want to analyze historical price fluctuations of products so that I can identify the best time to purchase them.
-- As a user, I want to visualize price changes over time using simple and meaningful charts to better understand pricing trends.
+- As a user, I want to analyze historical price movements to understand pricing trends.
+- As a user, I want to measure how discount events affect product prices.
+- As an analyst, I want a clean API to retrieve price history and analytics.
+- As a developer, I want a reusable backend that can power different frontends.
 
 🚀 MVP Scope
 
-The Minimum Viable Product (MVP) focuses on:
-- Collecting product price data via API or web scraping
-- Storing historical prices in a relational database
-- Allowing users to filter products and time ranges
-- Displaying clear, time-based price visualizations
+The MVP intentionally focuses on backend robustness and data correctness.
 
-The MVP intentionally excludes advanced features such as predictions, alerts, and competitor analysis to maintain a focused and maintainable scope.
+Included:
+- Product ingestion via API
+- Daily price snapshot generation
+- Event-based price adjustments (pre-event uplift, discounts)
+- Historical price storage
+- Analytical REST endpoints
+- Unit and integration tests
+- Scheduled ingestion via cron
+
+Excluded (by design):
+- Price prediction
+- Notifications or alerts
+- Competitor comparison
+- Frontend dashboards (planned next)
 
 🏗️ System Architecture
 
 The application follows a modular, end-to-end data pipeline architecture:
 
 ```
-Data Source (API / Scraping)
-        ↓
-Data Ingestion & Cleaning (Pandas)
-        ↓
-Relational Database (MySQL)
-        ↓
-Backend API (FastAPI / Flask)
-        ↓
-Frontend Dashboard (Streamlit)
-        ↓
-Public Deployment (Streamlit Cloud)
+E-commerce API
+      ↓
+Daily Ingestion Script (Python)
+      ↓
+Pricing Engine (Synthetic Price Logic)
+      ↓
+MySQL Database
+      ↓
+FastAPI Backend (Analytics & Data Access)
+      ↓
+(Planned) Streamlit Dashboard
 ```
 
-This separation ensures scalability, maintainability, and clear responsibility between components.
+The system is designed with clear separation of concerns:
+- Ingestion logic
+- Pricing rules
+- Database access
+- Analytics
+- API layer
 
 🗂️ Project Structure (Planned)
 
 ```
 ecommerce-price-tracker/
-├── data/
-│   ├── raw/
-│   └── processed/
-├── ingestion/
-│   └── fetch_prices.py
-├── database/
-│   ├── schema.sql
-│   └── procedures.sql
 ├── backend/
+│   ├── api/
+│   │   ├── products/
+│   │   |   ├── crud.py
+│   │   |   └── routes.py
+│   │   ├── events/
+│   │   |   ├── crud.py
+│   │   |   └── routes.py
+│   │   └── analytics/
+│   │       ├── crud.py
+│   │       └── routes.py
+│   ├── ingestion/
+│   │   ├── fetch_products.py
+│   │   ├── price_engine.py
+│   │   ├── daily_ingestion.py
+│   │   ├── seed_data.py
+│   │   └── seed_events.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── database.py
 │   └── main.py
-├── frontend/
-│   └── app.py
+│
+├── scripts/
+│   ├── run_daily_ingestion.py
+│   ├── setup_database.py
+│   └── setup.sh
+│
+├── shared/
+│   ├── config.py
+│   └── constants.py
+│
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── conftest.py
+│
+├── pyproject.toml
 ├── .env
-├── .gitignore
 ├── requirements.txt
 └── README.md
+
 ```
 
-🛠️ Technologies Used
-- Python
-- Pandas
-- MySQL
-- FastAPI / Flask
-- Streamlit
-- REST APIs / Web Scraping
-- Streamlit Cloud (Deployment)
+🛠️ Tech Stack
+- Python 3.10
+- FastAPI – RESTful backend
+- SQLAlchemy – ORM & database modeling
+- Pydantic – schema validation
+- MySQL – relational database
+- Pytest – unit & integration testing
+- Cron – scheduled daily ingestion
+
+🔑 Key Backend Features
+
+🔹 Daily Price Ingestion
+- Fetches product data from API
+- Generates synthetic daily prices
+- Ensures idempotent ingestion (no duplicate daily records)
+
+🔹 Pricing Engine
+- Base-price anchored pricing (prevents price drift)
+- Pre-event uplift simulation
+- Event-day discount application
+- Optional noise for realistic fluctuations
+
+🔹 Event Modeling
+- Discount events stored in database
+- Pre-event and event periods handled explicitly
+- Clean separation between baseline and event prices
+
+🔹 Analytics Endpoints
+- Price history per product
+- Price summary (min / max / average)
+- Event impact analysis (pre-event vs event)
+
+🔌 API Overview (MVP)
+Endpoint	                Description
+GET /health	                Health check
+GET /products	                List products
+GET /prices/history	        Price time series
+GET /analytics/price-summary	Min / Max / Avg prices
+GET /analytics/event-impact	Measure event price impact
+GET /events	                List discount events
+
+🧪 Testing
+
+The project includes:
+- Unit tests for pricing logic and event rules
+- Integration tests for ingestion workflows
+- Idempotency checks for daily ingestion
+- All tests must pass before ingestion or API changes.
 
 🔒 Configuration & Security
 
 Sensitive information such as API keys and database credentials is managed using environment variables and is not committed to the repository.
 
-🌱 Future Improvements
-- Price change notifications and alerts
-- Competitor price comparison
-- Market-level price volatility analysis
-- Predictive models for price trend forecasting
-
 📌 Status
 
-This project is actively under development as part of a structured, time-boxed learning roadmap focused on building end-to-end data applications.
+✅ Backend completed
+🚧 Frontend (Streamlit dashboard) planned as next phase
+
+🌱 Future Improvements
+
+- Streamlit-based interactive dashboard
+- Event comparison across products
+- Volatility metrics
+- Moving-average based pricing anchors
+- ML-ready feature extraction layer
 
 👤 Author
 
