@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from backend.database import SessionLocal
 from backend.models import Product, PriceHistory
-from backend.schemas import ProductCreate, PriceHistoryCreate
 from backend.ingestion.fetch_products import fetch_all_products
 from backend.ingestion.price_engine import generate_daily_price
 from shared.constants import PriceType

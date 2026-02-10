@@ -19,7 +19,6 @@ async def lifespan(app: FastAPI):
     # Startup
     print("[STARTUP] Initializing database...")
     setup_database()
-    run_daily_ingestion()
     yield
     # Shutdown
     print("[SHUTDOWN] Application shutting down...")

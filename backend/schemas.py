@@ -112,10 +112,19 @@ class EventImpactResponse(BaseModel):
 
     product_id: int
 
+    start_date: date
+    end_date: date
+    pre_event_days: int
+    post_event_days: int
+
     pre_event_avg_price: float
     event_avg_price: float
-    price_change_pct: float
-    price_change_abs: float
+    post_event_avg_price: float
+
+    pre_to_event_percentage_change: float
+    event_to_post_percentage_change: float
+
+    model_config=ConfigDict(from_attributes=True)
 
 # Health Check Schema
 class HealthResponse(BaseModel):

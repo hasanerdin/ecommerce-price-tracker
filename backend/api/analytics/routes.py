@@ -15,7 +15,7 @@ from backend.api.analytics import crud as crud_analytics
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
-@router.get("/{product_id}/price_history", response_model=List[PriceHistoryResponse])
+@router.get("/price-history", response_model=List[PriceHistoryResponse])
 def get_price_histories(product_id: int, 
                         start_date: Optional[date] = Query(None), 
                         end_date: Optional[date] = Query(None), 
@@ -44,7 +44,7 @@ def get_price_histories(product_id: int,
     
     return price_histories
 
-@router.get("/{product_id}/price-summary", response_model=PriceSummaryResponse)
+@router.get("/price-summary", response_model=PriceSummaryResponse)
 def price_summary_by_product_id(product_id: int, 
                                 start_date: Optional[date] = Query(None), 
                                 end_date: Optional[date] = Query(None), 
@@ -79,7 +79,7 @@ def price_summary_by_product_id(product_id: int,
     
     return summary
 
-@router.get("/{product_id}/discount-summary", response_model=DiscountSummaryResponse)
+@router.get("/discount-summary", response_model=DiscountSummaryResponse)
 def discount_summary_by_product_id(product_id: int, 
                                 start_date: Optional[date] = Query(None), 
                                 end_date: Optional[date] = Query(None), 
@@ -114,7 +114,7 @@ def discount_summary_by_product_id(product_id: int,
     
     return summary
 
-@router.get("/{event_id}/products/{product_id}/impact", response_model=EventImpactResponse)
+@router.get("/event-impact", response_model=EventImpactResponse)
 def get_event_impact(event_id: int, product_id: int, db: Session = Depends(get_db)):
     """
     Summarize the impact of the event on the product

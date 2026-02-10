@@ -58,10 +58,10 @@ def active_event_price_update(base_price: float, active_event: Event, metadata: 
 
     if active_event.noise_enabled:
         # Normal daily noise
-        price = apply_daily_noise(price)
+        final_price = apply_daily_noise(final_price)
         metadata["adjustment_reason"] += "+noise"
 
-    return round(final_price, 2), metadata
+    return final_price, metadata
 
 def pre_event_price_update(base_price: float, pre_event: Event, metadata: dict) -> Tuple[float, dict]:
     uplift = random.uniform(
@@ -81,10 +81,10 @@ def pre_event_price_update(base_price: float, pre_event: Event, metadata: dict) 
 
     if pre_event.noise_enabled:
         # Normal daily noise
-        price = apply_daily_noise(price)
+        final_price = apply_daily_noise(final_price)
         metadata["adjustment_reason"] += "+noise"
 
-    return round(final_price, 2), metadata
+    return final_price, metadata
 
 # --------------------------------------------------
 # Main entry point
@@ -122,12 +122,14 @@ def generate_daily_price(
     # Active event
     active_event = event_crud.get_active_event(db, current_date)
     if active_event:
-        return active_event_price_update(base_price, active_event, metadata)
+        final_price, metadata = active_event_price_update(base_price, active_event, metadata)
+        return round(final_price, 2), metadata
     
     # Pre-event
     pre_event = event_crud.get_pre_event(db, current_date)
     if pre_event:
-        return pre_event_price_update(base_price, pre_event, metadata)
+        final_price, metadata = pre_event_price_update(base_price, pre_event, metadata)
+        return round(final_price, 2), metadata
     
     # Normal day noise
     final_price = apply_daily_noise(base_price)

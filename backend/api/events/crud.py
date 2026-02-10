@@ -23,13 +23,15 @@ def get_all_events(db: Session, start_date: Optional[date] = None, end_date: Opt
     """
     Get list of all events
     """
-    return db.query(Event).filter(
-        Event.start_date <= end_date,
-        Event.end_date >= start_date
-    ).order_by(
-        Event.start_date,
-        Event.end_date
-    )
+    query = db.query(Event)
+
+    if start_date:
+        query.filter(Event.end_date >= start_date)
+    
+    if end_date:
+        query.filter(Event.start_date <= end_date)
+
+    return query.order_by(Event.start_date, Event.end_date).all()
 
 def count_events(db: Session) -> int:
     """

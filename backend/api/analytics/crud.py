@@ -136,6 +136,7 @@ def get_event_price_impact(
     db: Session,
     event_id: int,
     product_id: int,
+    post_event_days: int = 7
 ):
     """
     Impact of the Event over product
@@ -157,12 +158,11 @@ def get_event_price_impact(
     pre_start = event.start_date - timedelta(days=event.pre_event_days)
     pre_end = event.start_date - timedelta(days=1)
 
-    pre_event_avg = db.query(
+    pre_avg = db.query(
         func.avg(PriceHistory.price)
     ).filter(
         PriceHistory.product_id == product_id,
-        PriceHistory.recorded_date >= pre_start,
-        PriceHistory.recorded_date <= pre_end,
+        PriceHistory.recorded_date.between(pre_start, pre_end)
     ).scalar()
 
     # Event window
@@ -170,20 +170,38 @@ def get_event_price_impact(
         func.avg(PriceHistory.price)
     ).filter(
         PriceHistory.product_id == product_id,
-        PriceHistory.event_id == event_id,
+        PriceHistory.recorded_date.between(event.start_date, event.end_date)
     ).scalar()
 
-    if pre_event_avg is None or event_avg is None:
+    if pre_avg is None or event_avg is None:
         return None
+
+    # Post Event window
+    post_start = event.end_date + timedelta(days=1)
+    post_end = event.end_date + timedelta(days=post_event_days)
+
+    post_avg = db.query(
+        func.avg(PriceHistory.price)
+    ).filter(
+        PriceHistory.product_id == product_id,
+        PriceHistory.recorded_date.between(post_start, post_end)
+    ).scalar()
 
     return {
         "event_id": event.event_id,
         "event_name": event.event_name,
         "product_id": product_id,
-        "pre_event_avg_price": round(pre_event_avg, 2),
+        
+        "start_date": event.start_date,
+        "end_date": event.end_date,
+        "pre_event_days": event.pre_event_days,
+        "post_event_days": post_event_days,
+
+        "pre_event_avg_price": round(pre_avg, 2),
         "event_avg_price": round(event_avg, 2),
-        "price_change_abs": round(event_avg - pre_event_avg, 2),
-        "price_change_pct": round(
-            ((event_avg - pre_event_avg) / pre_event_avg) * 100, 2
-        ),
+        "post_event_avg_price": round(post_avg, 2),
+
+        "pre_to_event_percentage_change": round(((event_avg - pre_avg) / pre_avg) * 100, 2),
+        "event_to_post_percentage_change": round(((post_avg - event_avg) / event_avg) * 100, 2) 
+        if post_avg else None
     }
