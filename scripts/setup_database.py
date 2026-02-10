@@ -12,7 +12,6 @@ from backend.schemas import EventCreate
 from backend.api.events import crud as event_crud
 from backend.ingestion.seed_data import seed_events
 from backend.database import SessionLocal, init_db
-from backend.ingestion.seed_events import run_seed_events
 
 
 def run_seed_events(db: Session) -> None:

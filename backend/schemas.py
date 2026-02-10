@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # Product Schemas
 class ProductCreate(BaseModel):
     """Schema for product information"""
-    extarnal_id: int
+    external_id: int
     title: str = Field(..., min_length=1, max_length=255)
     description: str = Field(..., min_length=1, max_length=1000)
     base_price: float
@@ -14,7 +14,7 @@ class ProductCreate(BaseModel):
 
 class ProductResponse(ProductCreate):
     """Schema for proudct response"""
-    id: int
+    product_id: int
 
     model_config=ConfigDict(from_attributes=True)
 

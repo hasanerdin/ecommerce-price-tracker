@@ -4,17 +4,25 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from backend.database import engine, init_db
-from backend.models import Base
+from backend.database import engine
+
+from scripts.setup_database import setup_database
+from backend.ingestion.daily_ingestion import run_daily_ingestion
 from backend.schemas import HealthResponse
-from backend.api.products import routes as product_router
-from backend.api.analytics import routes as analytic_router
-from backend.api.events import routes as event_router
+from backend.api.products.routes import router as product_router
+from backend.api.analytics.routes import router as analytic_router
+from backend.api.events.routes import router as event_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize database on startup"""
-    init_db()
+    # Startup
+    print("[STARTUP] Initializing database...")
+    setup_database()
+    run_daily_ingestion()
+    yield
+    # Shutdown
+    print("[SHUTDOWN] Application shutting down...")
 
 # Create FastAPI app
 app = FastAPI(
@@ -73,7 +81,7 @@ if __name__ == "__main__":
 
     settings = get_settings()
     uvicorn.run(
-        "backend.api.main::app",
+        "backend.main::app",
         host=settings.api_host,
         port=settings.api_port,
         reload=True
