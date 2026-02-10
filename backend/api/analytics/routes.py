@@ -16,7 +16,10 @@ from backend.api.analytics import crud as crud_analytics
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 @router.get("/{product_id}/price_history", response_model=List[PriceHistoryResponse])
-def get_price_histories(product_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def get_price_histories(product_id: int, 
+                        start_date: Optional[date] = Query(None), 
+                        end_date: Optional[date] = Query(None), 
+                        db: Session = Depends(get_db)):
     """
     Get a list of price history of product
 
@@ -32,7 +35,7 @@ def get_price_histories(product_id: int, skip: int = 0, limit: int = 100, db: Se
     Raises:
         HTTPException if any price history for that product not found
     """
-    price_histories = crud_analytics.get_price_history(db, product_id, skip, limit)
+    price_histories = crud_analytics.get_price_history(db, product_id, start_date, end_date)
     if not price_histories:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

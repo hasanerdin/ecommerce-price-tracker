@@ -7,24 +7,31 @@ from sqlalchemy import func
 from backend.models import PriceHistory, Event
 
 def get_price_history(db: Session, product_id: int, 
-                      skip: int = 0, limit: int = 100) -> Optional[List[PriceHistory]]:
+                      start_date: Optional[date] = None, 
+                      end_date: Optional[date] = None) -> List[PriceHistory]:
     """
     Get list of all price history of the product
 
     Args:
         db: Database session
         product_id: Product ID
-        skip: Number of records to skip
-        limit: Maximum number of records to return
+        start_date: beginning date of the history
+        end_date: end date of the history
 
     Returns:
         List of price history or None if product_id not found
     """
-    return db.query(PriceHistory).filter(
+    query = db.query(PriceHistory).filter(
         PriceHistory.product_id == product_id
-    ).order_by(
-        PriceHistory.created_at.desc()
-        ).offset(skip).limit(limit).all()
+    )
+
+    if start_date:
+        query = query.filter(PriceHistory.recorded_date >= start_date)
+
+    if end_date:
+        query = query.filter(PriceHistory.recorded_date <= end_date)
+
+    return query.order_by(PriceHistory.recorded_date.asc()).all()
 
 def get_price_history_by_recorded_date(db: Session, product_id: int, recorded_date: date) -> Optional[PriceHistory]:
     """
@@ -56,26 +63,32 @@ def get_price_summary(db: Session, product_id: int, start_date: date, end_date: 
     Returns:
         summary of the price history
     """
-    summary = db.query(
+    query = db.query(
         func.min(PriceHistory.price).label("min_price"),
         func.max(PriceHistory.price).label("max_price"),
         func.avg(PriceHistory.price).label("avg_price")
     ).filter(
         PriceHistory.product_id == product_id,
-        PriceHistory.recorded_date >= start_date,
-        PriceHistory.recorded_date <= end_date
-    ).one()
+    )
 
-    if summary.min_price is None:
+    if start_date:
+        query.filter(PriceHistory.recorded_date >= start_date)
+
+    if end_date:
+        query.filter(PriceHistory.recorded_date <= end_date)
+
+    summary = query.one_or_none()
+
+    if not summary or summary.min_price is None:
         return None 
 
     return {
         "product_id": product_id,
         "start_date": start_date,
         "end_date": end_date,
-        "min_price": summary.min_price,
-        "max_price": summary.max_price,
-        "avg_price": summary.avg_price
+        "min_price": float(summary.min_price),
+        "max_price": float(summary.max_price),
+        "avg_price": float(summary.avg_price)
     }
 
 def get_discount_summary(db: Session, product_id: int, start_date: date, end_date: date) -> Optional[Dict[str, Any]]:
@@ -91,26 +104,32 @@ def get_discount_summary(db: Session, product_id: int, start_date: date, end_dat
     Returns:
         summary of the discount history
     """
-    summary = db.query(
+    query = db.query(
         func.min(PriceHistory.discount_percent).label("min_discount"),
         func.max(PriceHistory.discount_percent).label("max_discount"),
         func.avg(PriceHistory.discount_percent).label("avg_discount")
     ).filter(
         PriceHistory.product_id == product_id,
-        PriceHistory.recorded_date >= start_date,
-        PriceHistory.recorded_date <= end_date
-    ).one()
+    )
+    
+    if start_date:
+        query.filter(PriceHistory.recorded_date >= start_date)
 
-    if not summary.min_discount:
+    if end_date:
+        query.filter(PriceHistory.recorded_date <= end_date)
+
+    summary = query.one_or_none()
+
+    if not summary or summary.min_price is None:
         return None 
 
     return {
         "product_id": product_id,
         "start_date": start_date,
         "end_date": end_date,
-        "min_discount": summary.min_discount,
-        "max_discount": summary.max_discount,
-        "avg_discount": summary.avg_discount
+        "min_discount": float(summary.min_discount),
+        "max_discount": float(summary.max_discount),
+        "avg_discount": float(summary.avg_discount)
     }
 
 def get_event_price_impact(
