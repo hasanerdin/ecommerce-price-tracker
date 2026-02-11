@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     db_user: str = os.getenv("DB_USER")
     db_password: str = os.getenv("DB_PASSWORD")
 
+    model_config=SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False
+    )
+
     @property
     def database_url(self) -> str:
         """Construct MySQL database URL"""
