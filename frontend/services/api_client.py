@@ -1,8 +1,10 @@
 import requests
 from typing import List, Dict, Optional
 from datetime import date
+import os
 
-BASE_API_URL = "http://localhost:8000"
+# BASE_API_URL = "http://localhost:8000"
+BASE_API_URL = os.getenv("API_BASE_URL")
 
 
 def check_api_health() -> bool:
