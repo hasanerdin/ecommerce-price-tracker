@@ -1,4 +1,5 @@
 """Shared configuration settings"""
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from shared.constants import PriceType
@@ -6,23 +7,11 @@ from shared.constants import PriceType
 class Settings(BaseSettings):
     """Application settings for MySQL from environment variables"""
     # Database Configuration
-    db_host: str = "localhost"
-    db_port: int = 3306
-    db_name: str = "price-tracker"
-    db_user: str = "root"
-    db_password: str = ""
-
-    # API Configuration
-    api_host: str = "0.0.0.0"
-    api_port: int = 8000
-
-    # Frontend Configuration
-    frontend_port: int = 8501
-
-    model_config=SettingsConfigDict(
-        env_file=".env",
-        case_sensitive=False
-    )
+    db_host: str = os.getenv("DB_HOST")
+    db_port: int = os.getenv("DB_PORT")
+    db_name: str = os.getenv("DB_NAME")
+    db_user: str = os.getenv("DB_USER")
+    db_password: str = os.getenv("DB_PASSWORD")
 
     @property
     def database_url(self) -> str:
