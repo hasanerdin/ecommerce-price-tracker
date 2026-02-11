@@ -19,7 +19,6 @@ def setup_database() -> None:
     seed_events.seed()
     print("[SETUP] Event seeding completed.")
 
-def fill_yearly_price() -> None:
     print("[SETUP] Seeding prices...")
     seed_data.seed()
     print("[SETUP] Price seeding completed.")
