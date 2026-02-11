@@ -1,5 +1,5 @@
 """Shared configuration settings"""
-from typing import Optional
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from shared.constants import PriceType
@@ -7,11 +7,11 @@ from shared.constants import PriceType
 class Settings(BaseSettings):
     """Application settings for MySQL from environment variables"""
     # Database Configuration
-    db_host: Optional[str] = None
-    db_port: Optional[int] = None
-    db_name: Optional[str] = None
-    db_user: Optional[str] = None
-    db_password: Optional[str] = None
+    db_host: str = os.getenv("DB_HOST")
+    db_port: int = os.getenv("DB_PORT")
+    db_name: str = os.getenv("DB_NAME")
+    db_user: str = os.getenv("DB_USER")
+    db_password: str = os.getenv("DB_PASSWORD")
 
     model_config=SettingsConfigDict(
         env_file=".env",
